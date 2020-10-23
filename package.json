@@ -23,10 +23,16 @@
   },
   "dependencies": {
     "@nuxt/content": "^1.9.0",
+    "@nuxtjs/auth": "^4.8.1",
     "@nuxtjs/axios": "^5.12.2",
+    "@nuxtjs/dotenv": "^1.4.1",
     "@nuxtjs/pwa": "^3.0.2",
+    "bootstrap": "^3.4.1",
     "core-js": "^3.6.5",
-    "nuxt": "^2.14.6"
+    "moment": "^2.29.1",
+    "nuxt": "^2.14.6",
+    "vue": "^2.6.12",
+    "vuelidate": "^0.7.5"
   },
   "devDependencies": {
     "@commitlint/cli": "^11.0.0",

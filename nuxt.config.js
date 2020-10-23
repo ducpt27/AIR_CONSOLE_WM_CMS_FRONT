@@ -11,13 +11,14 @@ export default {
       { hid: 'description', name: 'description', content: '' },
     ],
     link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
+    script: [],
   },
 
   // Global CSS (https://go.nuxtjs.dev/config-css)
   css: [],
 
   // Plugins to run before rendering page (https://go.nuxtjs.dev/config-plugins)
-  plugins: [],
+  plugins: ['@/plugins/axios'],
 
   // Auto import components (https://go.nuxtjs.dev/config-components)
   components: true,
@@ -40,10 +41,47 @@ export default {
     '@nuxtjs/pwa',
     // https://go.nuxtjs.dev/content
     '@nuxt/content',
+    '@nuxtjs/dotenv',
+    '@nuxtjs/auth',
   ],
 
   // Axios module configuration (https://go.nuxtjs.dev/config-axios)
-  axios: {},
+  axios: {
+    baseURL: process.env.API_URL || ' http://localhost:8200/api/',
+    debug: process.env.DEBUG || false,
+    proxyHeaders: false,
+    credentials: false,
+  },
+
+  auth: {
+    strategies: {
+      local: {
+        endpoints: {
+          login: {
+            url: 'auth/signin',
+            method: 'post',
+            propertyName: 'message',
+          },
+          user: {
+            url: 'user/me',
+            method: 'get',
+            propertyName: 'message',
+          },
+          tokenRequired: true,
+          logout: false,
+        },
+      },
+      tokenName: 'Authorization',
+      globalToken: true,
+      watchLoggedIn: true,
+      redirect: {
+        login: '/login',
+        logout: '/',
+        callback: '/login',
+        home: '/',
+      },
+    },
+  },
 
   // Content module configuration (https://go.nuxtjs.dev/config-content)
   content: {},
