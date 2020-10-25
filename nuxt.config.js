@@ -63,7 +63,7 @@ export default {
             propertyName: 'message',
           },
           user: {
-            url: 'user/me',
+            url: 'users/me?transId=21msxk&channel=cms',
             method: 'get',
             propertyName: 'message',
           },

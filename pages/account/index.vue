@@ -10,10 +10,15 @@
       class="elevation-1"
       @page-count="pageCount = $event"
     >
-      <template v-slot:item.isAdmin="{ item }">
-        <v-chip :color="getColor(item.isAdmin, 'isAdmin')" dark outlined>
-          {{ item.isAdmin === 1 ? 'Admin' : 'Tắt' }}
-        </v-chip>
+      <template v-slot:item.admin="{ item }">
+        <span>
+          {{ item.admin === true ? 'Admin' : '' }}
+        </span>
+      </template>
+      <template v-slot:item.groups="{ item }">
+        <span v-for="group in item.groups" :key="group.id" class="item_group">
+          {{ group.description }}
+        </span>
       </template>
       <template v-slot:top>
         <v-toolbar>
@@ -49,24 +54,24 @@
                         rows="1"
                         row-height="15"
                         label="Tên đăng nhập"
+                        readonly
+                        disabled
                       ></v-textarea>
                     </v-col>
                     <v-col cols="12" md="12">
                       <v-text-field
-                        v-model="editedItem.password"
-                        label="Mật khẩu"
-                      ></v-text-field>
-                    </v-col>
-                    <v-col cols="12" md="12">
-                      <v-text-field
-                        v-model="editedItem.rePassword"
-                        label="Mật khẩu"
+                        v-model="editedItem.email"
+                        label="Email"
                       ></v-text-field>
                     </v-col>
                     <v-col cols="12" md="12">
                       <v-switch
-                        v-model="editedItem.isAdmin"
-                        :label="`${editedItem.isAdmin === true ? 'Admin' : ''}`"
+                        v-model="editedItem.admin"
+                        :label="`${
+                          editedItem.admin === true
+                            ? 'Admin: Bật'
+                            : 'Admin: Tắt'
+                        }`"
                       ></v-switch>
                     </v-col>
                   </v-row>
@@ -143,24 +148,21 @@ export default {
       { text: 'Tên đăng nhập', value: 'username' },
       { text: 'Họ và tên', value: 'name' },
       { text: 'Email', value: 'email' },
-      { text: 'Admin', value: 'isAdmin' },
+      { text: 'Nhóm người dùng', value: 'groups', width: 150 },
+      { text: 'Quyền', value: 'admin' },
       { text: '', width: '100px', value: 'actions', sortable: false },
     ],
     accounts: [],
     editedIndex: -1,
     editedItem: {
-      name: '',
-      username: '',
-      email: '',
-      isAdmin: false,
-      rePassword: '',
+      name: null,
+      email: null,
+      admin: false,
     },
     defaultItem: {
-      name: '',
-      username: '',
-      email: '',
-      isAdmin: false,
-      rePassword: '',
+      name: null,
+      email: null,
+      admin: false,
     },
   }),
 
@@ -219,9 +221,16 @@ export default {
 
     async deleteItemConfirm() {
       try {
-        const response = await this.$axios.delete('users/' + this.editedItem.id)
+        const response = await this.$axios.delete(
+          'auth/signup' + this.editedItem.id
+        )
         if (response.data.code === 0) {
           await this.initialize()
+        } else {
+          // eslint-disable-next-line no-console
+          this.error(response.data.message)
+          // eslint-disable-next-line no-console
+          console.log(response.data)
         }
       } catch (e) {
         // eslint-disable-next-line no-console
@@ -251,10 +260,11 @@ export default {
         try {
           const response = await this.$axios.put(
             'users/' + this.editedItem.id,
-            this.editedItem
+            await this.mapToReq(this.editedItem, true)
           )
           // eslint-disable-next-line no-console
-          await console.log(response.data)
+          console.log(response.data)
+          this.error = response.data.message
           await this.initialize()
         } catch (e) {
           // eslint-disable-next-line no-console
@@ -263,9 +273,13 @@ export default {
         // Object.assign(this.desserts[this.editedIndex], this.editedItem)
       } else {
         try {
-          const response = await this.$axios.post('users', this.editedItem)
+          const response = await this.$axios.post(
+            'auth/signup',
+            await this.mapToReq(this.editedItem, false)
+          )
           // eslint-disable-next-line no-console
-          await console.log(response.data)
+          console.log(response.data)
+          this.error = response.data.message
           await this.initialize()
         } catch (e) {
           // eslint-disable-next-line no-console
@@ -276,18 +290,52 @@ export default {
       this.close()
     },
 
-    getColor(val1, field) {
-      if (field === 'isAdmin') {
-        if (val1 === 0) return 'white'
-        else return 'green'
-      }
-    },
-
     format_date(value) {
       if (value) {
         return moment(String(value)).format('hh:mm:ss DD/MM/yyyy')
       }
     },
+
+    mapToReq(obj, isNew = false) {
+      try {
+        group = []
+        if (obj.groups != null && obj.groups.length > 0) {
+          for (let i; i < obj.groups; i++) {
+            // eslint-disable-next-line no-undef
+            group.push(obj.groups[i].id)
+          }
+        }
+
+        req = {
+          name: obj.name,
+          email: obj.email,
+          isAdmin: obj.admin,
+          password: obj.password,
+          username: obj.username,
+          channel: 'cms',
+          transId: 'k2o5mm',
+          groups: group,
+        }
+        return req
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.log(e)
+      }
+      return null
+    },
   },
 }
+let group
+let req
 </script>
+
+<style scoped>
+.item_group::after {
+  content: ' | ';
+  color: dodgerblue;
+  font-size: 20px;
+}
+.item_group:last-child::after {
+  content: '';
+}
+</style>
