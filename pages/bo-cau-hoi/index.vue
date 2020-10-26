@@ -270,6 +270,8 @@ export default {
           }
         }
       } catch (e) {
+        // eslint-disable-next-line no-console
+        console.log(e)
         this.error = 'Lỗi hệ thống.'
       }
     },
@@ -333,7 +335,6 @@ export default {
           // eslint-disable-next-line no-console
           console.log(e)
         }
-        // Object.assign(this.desserts[this.editedIndex], this.editedItem)
       } else {
         try {
           const response = await this.$axios.post('questions', this.editedItem)
@@ -344,7 +345,6 @@ export default {
           // eslint-disable-next-line no-console
           console.log(e)
         }
-        // this.desserts.push(this.editedItem)
       }
       this.close()
     },
