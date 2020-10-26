@@ -1,7 +1,11 @@
 {
   "name": "F_WM_CMS",
   "version": "1.0.0",
-  "private": true,
+  "private": false,
+  "engines": {
+    "node": "12.18.x",
+    "npm": "6.x"
+  },
   "scripts": {
     "dev": "nuxt",
     "build": "nuxt build",
