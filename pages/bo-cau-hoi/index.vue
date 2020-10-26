@@ -24,7 +24,7 @@
         <v-toolbar>
           <h3>Bộ câu hỏi</h3>
           <v-spacer></v-spacer>
-          <v-dialog v-model="dialog" max-width="780px">
+          <v-dialog v-model="dialog" max-width="880px">
             <template v-slot:activator="{ on, attrs }">
               <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">
                 Thêm mới
@@ -45,21 +45,24 @@
                         rows="1"
                         row-height="15"
                         label="Câu hỏi"
+                        solo
                       ></v-textarea>
                     </v-col>
-                    <v-col cols="12">
+                    <v-col cols="12" md="6">
                       <v-textarea
                         v-model="editedItem.info"
                         auto-grow
                         rows="1"
                         row-height="15"
                         label="Thông tin đáp án"
+                        solo
                       ></v-textarea>
                     </v-col>
-                    <v-col cols="12" md="12">
+                    <v-col cols="12" md="6">
                       <v-text-field
                         v-model="editedItem.next_id"
                         label="ID câu tiếp"
+                        solo
                       ></v-text-field>
                     </v-col>
                     <v-col cols="12" md="6" sm="12">
@@ -71,13 +74,47 @@
                         thumb-label="always"
                         min="1"
                         max="5"
+                        style="height: 50px; padding: 13px 0"
                       ></v-slider>
                     </v-col>
-                    <v-col cols="12" md="12" sm="12">
+                    <v-col cols="12" md="6" sm="12">
                       <v-switch
                         v-model="editedItem.status"
                         :label="`${editedItem.status == true ? 'Bật' : 'Tắt'}`"
                       ></v-switch>
+                    </v-col>
+                    <v-col cols="12" md="6">
+                      <v-btn elevation="2" icon rounded color="primary">
+                        <v-icon>mdi-plus</v-icon>
+                      </v-btn>
+                      <span>Thêm câu trả lời</span>
+                    </v-col>
+
+                    <v-col cols="12">
+                      <v-row>
+                        <v-col
+                          v-for="item in editedItem.answers"
+                          :key="item.id"
+                          cols="12"
+                          md="6"
+                        >
+                          <v-row>
+                            <v-col cols="2">
+                              <v-radio
+                                v-model="item.true"
+                                class="radio_answer"
+                              ></v-radio>
+                            </v-col>
+                            <v-col cols="10">
+                              <v-text-field
+                                v-model="item.name"
+                                label="Đáp án"
+                                solo
+                              ></v-text-field>
+                            </v-col>
+                          </v-row>
+                        </v-col>
+                      </v-row>
                     </v-col>
                   </v-row>
                 </v-container>
@@ -162,6 +199,11 @@ export default {
       { text: '', width: '100px', value: 'actions', sortable: false },
     ],
     questions: [],
+    answers: [],
+    answer: {
+      name: null,
+      is_true: false,
+    },
     editedIndex: -1,
     editedItem: {
       name: '',
@@ -169,7 +211,7 @@ export default {
       mile_stone: null,
       next_id: null,
       status: false,
-      answers: null,
+      answers: [],
     },
     defaultItem: {
       name: '',
@@ -177,7 +219,7 @@ export default {
       mile_stone: null,
       next_id: null,
       status: false,
-      answers: null,
+      answers: [],
     },
   }),
 
@@ -328,3 +370,11 @@ export default {
   },
 }
 </script>
+
+<style>
+.radio_answer {
+  height: 44px;
+  line-height: 44px;
+  margin: 0 6px;
+}
+</style>
