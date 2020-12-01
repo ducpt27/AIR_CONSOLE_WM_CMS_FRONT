@@ -189,7 +189,7 @@ export default {
     async initialize() {
       try {
         const response = await this.$axios.get(
-          'users?channel=cms&transId=2hmk3k'
+          'users?channel=cms&transId=' + this.create_transId()
         )
         this.accounts = response.data.data
         if (this.accounts != null) {
@@ -296,6 +296,14 @@ export default {
       }
     },
 
+    create_transId() {
+      return 'xxxxxx'.replace(/[xy]/g, function (c) {
+        const dt = new Date().getTime()
+        const r = (dt + Math.random() * 16) % 16 | 0
+        return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16)
+      })
+    },
+
     mapToReq(obj, isNew = false) {
       try {
         group = []
@@ -313,7 +321,7 @@ export default {
           password: obj.password,
           username: obj.username,
           channel: 'cms',
-          transId: 'k2o5mm',
+          transId: this.create_transId(),
           groups: group,
         }
         return req

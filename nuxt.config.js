@@ -14,6 +14,12 @@ export default {
     script: [],
   },
 
+  server: {
+    port: 8000, // default: 3000
+    host: 'localhost', // default: localhost,
+    timing: false,
+  },
+
   // Global CSS (https://go.nuxtjs.dev/config-css)
   css: [],
 
@@ -65,7 +71,7 @@ export default {
           user: {
             url: 'users/me?transId=21msxk&channel=cms',
             method: 'get',
-            propertyName: 'message',
+            propertyName: 'data',
           },
           tokenRequired: true,
           logout: false,

@@ -70,12 +70,12 @@
               <v-avatar color="primary">
                 <span class="white--text headline">Đ</span>
               </v-avatar>
-              <h3>Phạm Trung Đức</h3>
-              <p class="caption mt-1">ducpham27022k@gmail.com</p>
+              <h3 style="margin-top: 7px">{{ loggedInUser.name }}</h3>
+              <p class="caption mt-1">{{ loggedInUser.username }}</p>
               <v-divider class="my-3"></v-divider>
               <v-btn text color="primary"> Thông tin tài khoản</v-btn>
               <v-divider class="my-3"></v-divider>
-              <v-btn text color="brown"> Đăng xuất</v-btn>
+              <v-btn text color="brown" @click="logout"> Đăng xuất</v-btn>
             </div>
           </v-list-item-content>
         </v-card>
@@ -90,6 +90,8 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
+
 export default {
   data() {
     return {
@@ -113,7 +115,7 @@ export default {
           title: 'Bộ câu hỏi',
           items: [
             {
-              icon: 'mdi-apps',
+              icon: 'comment-question-outline',
               title: 'Danh sách',
               to: '/bo-cau-hoi',
             },
@@ -124,6 +126,17 @@ export default {
       right: true,
       rightDrawer: false,
     }
+  },
+
+  computed: {
+    ...mapGetters(['loggedInUser']),
+  },
+
+  methods: {
+    async logout() {
+      await this.$auth.logout()
+      this.$router.push('/login')
+    },
   },
 }
 </script>

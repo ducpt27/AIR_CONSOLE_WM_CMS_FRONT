@@ -80,41 +80,57 @@
                     <v-col cols="12" md="6" sm="12">
                       <v-switch
                         v-model="editedItem.status"
-                        :label="`${editedItem.status == true ? 'Bật' : 'Tắt'}`"
+                        :label="`${editedItem.status === true ? 'Bật' : 'Tắt'}`"
                       ></v-switch>
                     </v-col>
                     <v-col cols="12" md="6">
-                      <v-btn elevation="2" icon rounded color="primary">
-                        <v-icon>mdi-plus</v-icon>
+                      <v-btn
+                        elevation="2"
+                        rounded
+                        color="primary"
+                        style="margin-right: 12px"
+                        dark
+                        @click="add_answer()"
+                      >
+                        Thêm câu trả lời
                       </v-btn>
-                      <span>Thêm câu trả lời</span>
                     </v-col>
 
                     <v-col cols="12">
-                      <v-row>
-                        <v-col
-                          v-for="item in editedItem.answers"
-                          :key="item.id"
-                          cols="12"
-                          md="6"
-                        >
-                          <v-row>
-                            <v-col cols="2">
-                              <v-radio
-                                v-model="item.true"
-                                class="radio_answer"
-                              ></v-radio>
-                            </v-col>
-                            <v-col cols="10">
-                              <v-text-field
-                                v-model="item.name"
-                                label="Đáp án"
-                                solo
-                              ></v-text-field>
-                            </v-col>
-                          </v-row>
-                        </v-col>
-                      </v-row>
+                      <v-radio-group v-model="indexAnswerTrue">
+                        <v-row>
+                          <v-col
+                            v-for="(item, i) in editedItem.answers"
+                            :key="item.id"
+                            cols="12"
+                            md="6"
+                            class="radio_answer"
+                          >
+                            <v-radio
+                              :value="i"
+                              class="d-inline-block"
+                            ></v-radio>
+                            <v-text-field
+                              v-model="item.name"
+                              label="Đáp án"
+                              solo
+                              class="d-inline-block"
+                              style="width: calc(100% - 70px)"
+                            ></v-text-field>
+                            <v-btn
+                              class="d-inline-block"
+                              small
+                              text
+                              icon
+                              light
+                              color="black"
+                              @click="remove_answer(i)"
+                            >
+                              <v-icon dark> mdi-minus </v-icon>
+                            </v-btn>
+                          </v-col>
+                        </v-row>
+                      </v-radio-group>
                     </v-col>
                   </v-row>
                 </v-container>
@@ -200,10 +216,7 @@ export default {
     ],
     questions: [],
     answers: [],
-    answer: {
-      name: null,
-      is_true: false,
-    },
+    indexAnswerTrue: -1,
     editedIndex: -1,
     editedItem: {
       name: '',
@@ -232,6 +245,7 @@ export default {
   watch: {
     dialog(val) {
       val || this.close()
+      this.initialize()
     },
     dialogDelete(val) {
       val || this.closeDelete()
@@ -246,10 +260,13 @@ export default {
     async initialize() {
       try {
         const response = await this.$axios.get(
-          'questions?channel=cms&transId=2hmk3k&page=0&size=0'
+          'questions?channel=cms&transId=' +
+            this.create_transId() +
+            '&page=0&size=0'
         )
         // eslint-disable-next-line no-console
         await console.log(response.data)
+
         if (response.data.content !== undefined) {
           this.questions = response.data.content
           this.pageCount = response.data.totalPages
@@ -279,6 +296,28 @@ export default {
     editItem(item) {
       this.editedIndex = this.questions.indexOf(item)
       this.editedItem = Object.assign({}, item)
+
+      if (this.editedItem !== null) {
+        if (
+          this.editedItem.answers !== undefined &&
+          this.editedItem.answers !== null
+        ) {
+          for (let j = 0; j < this.editedItem.answers.length; j++) {
+            try {
+              if (this.editedItem.answers[j].true) {
+                this.indexAnswerTrue = j
+                break
+              }
+            } catch (e) {
+              // eslint-disable-next-line no-console
+              console.log(e)
+            }
+          }
+        } else {
+          this.indexAnswerTrue = -1
+        }
+      }
+
       this.dialog = true
     },
 
@@ -326,7 +365,7 @@ export default {
         try {
           const response = await this.$axios.put(
             'questions/' + this.editedItem.id,
-            this.editedItem
+            this.map_to_req()
           )
           // eslint-disable-next-line no-console
           await console.log(response.data)
@@ -337,7 +376,10 @@ export default {
         }
       } else {
         try {
-          const response = await this.$axios.post('questions', this.editedItem)
+          const response = await this.$axios.post(
+            'questions',
+            this.map_to_req()
+          )
           // eslint-disable-next-line no-console
           await console.log(response.data)
           await this.initialize()
@@ -362,19 +404,67 @@ export default {
       }
     },
 
+    add_answer() {
+      try {
+        this.editedItem.answers.push({
+          id: null,
+          name: '',
+          true: false,
+        })
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.log(e)
+      }
+    },
+
+    remove_answer(index) {
+      try {
+        this.editedItem.answers.splice(index, 1)
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.log(e)
+      }
+    },
+
+    map_to_req() {
+      obj = []
+      for (let i = 0; i < this.editedItem.answers.length; i++) {
+        const var1 = this.editedItem.answers[i]
+        // eslint-disable-next-line eqeqeq
+        const isTrue = i === this.indexAnswerTrue
+        obj.push({
+          id: var1.id,
+          name: var1.name,
+          // eslint-disable-next-line eqeqeq
+          true: isTrue,
+        })
+      }
+      return {
+        name: this.editedItem.name,
+        info: this.editedItem.info,
+        status: this.editedItem.status,
+        next_id: this.editedItem.next_id,
+        mile_stone: this.editedItem.mile_stone,
+        answers: obj,
+        channel: 'cms',
+        transId: this.create_transId(),
+      }
+    },
+
     format_date(value) {
       if (value) {
         return moment(String(value)).format('hh:mm:ss DD/MM/yyyy')
       }
     },
+
+    create_transId() {
+      return 'xxxxxx'.replace(/[xy]/g, function (c) {
+        const dt = new Date().getTime()
+        const r = (dt + Math.random() * 16) % 16 | 0
+        return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16)
+      })
+    },
   },
 }
+let obj
 </script>
-
-<style>
-.radio_answer {
-  height: 44px;
-  line-height: 44px;
-  margin: 0 6px;
-}
-</style>
